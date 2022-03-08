@@ -322,7 +322,7 @@ $(function(){
 				$("#vit").spinner("value",$("#vit").spinner("value")-10);
 				para0=para0-10;
 				lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-				hpfunc($("#str").spinner("value"));
+				hpfunc($("#").spinner("value"));
 			}
  		});
 	$("#tenup2")
