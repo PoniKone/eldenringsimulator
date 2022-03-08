@@ -5,5 +5,5 @@ URL:https://ponikone.github.io/eldenringsimulator/<br>
 # 仕様
 各素性の初期ステータスからステータス割り振りによるレベル変動
 
-2022/03/08
+2022/03/08<br>
 ・HP、FP、スタミナ、装備重量を実装
