@@ -31,6 +31,48 @@ var minpara6=para6;
 var minpara7=para7;
 var minpara8=para8;
 
+var hpary = [0,0,0,0,0,0,0,0,0,394,
+		 	 414,434,455,476,499,522,547,572,598,624,
+		 	 652,680,709,738,769,800,833,870,910,951,
+		 	 994,1037,1081,1125,1170,1216,1262,1308,1355,1402,
+		 	 1450,1476,1503,1529,1555,1581,1606,1631,1656,1680,			 	1704,1727,1750,1772,1793,1814,1834,1853,1871,1887,
+		 	 1900,1906,1912,1918,1924,1930,1936,1942,1948,1954,
+		 	 1959,1965,1971,1977,1982,1988,1993,1999,2004,2010,
+		 	 2015,2020,2026,2031,2036,2041,2046,2051,2056,2060,
+		 	 2065,2070,2074,2078,2082,2086,2090,2094,2097,2100];
+
+var fpary = [0,0,0,0,0,0,0,0,0,65,
+		 	 68,71,74,77,81,84,87,90,93,96,
+		 	 100,106,112,118,124,130,136,142,148,154,		 	160,166,172,178,184,190,196,202,208,214,
+		 	 220,226,232,238,244,250,256,262,268,274,
+		 	 280,288,297,305,313,321,328,335,341,346,
+		 	 350,352,355,357,360,362,365,367,370,373,
+		 	 375,378,380,383,385,388,391,393,396,398,
+		 	 401,403,406,408,411,414,416,419,421,424,
+		 	 426,429,432,434,437,439,442,444,447,450];
+
+var stary = [0,0,0,0,0,0,0,0,90,91,
+		 	 92,94,95,97,98,100,101,103,105,106,
+		 	 108,110,111,113,115,116,118,120,121,123,
+		 	 125,126,128,129,131,132,134,135,137,138,
+		 	 140,141,143,144,146,147,149,150,152,153,
+		 	 155,155,155,155,156,156,156,157,157,157,
+		 	 158,158,158,158,159,159,159,160,160,160,
+		 	 161,161,161,162,162,162,162,163,163,163,
+		 	 164,164,164,165,165,165,166,166,166,166,
+		 	 167,167,167,168,168,168,169,169,169,170];
+
+var cpary = [0,0,0,0,0,0,0,0,450,466,
+		 	  482,498,514,529,545,561,577,593,609,625,
+		 	  641,656,672,688,704,720,730,741,752,764,
+		 	  776,789,802,815,828,841,854,868,881,895,
+		 	  909,923,937,951,965,979,994,1008,1022,1037,
+		 	  1052,1066,1081,1096,1110,1125,1140,1155,1170,1185,
+		 	  1200,1210,1221,1231,1241,1251,1262,1272,1282,1292,
+		 	  1303,1313,1323,1333,1344,1354,1364,1374,1385,1395,
+		 	  1405,1415,1426,1436,1446,1456,1467,1477,1487,1497,
+		 	  1508,1518,1528,1538,1549,1559,1569,1579,1590,160];
+// 追記ここまで
 
 
 
@@ -113,6 +155,10 @@ $(function(){
 			$("#int").spinner({max:99,min:para6}).spinner("value",para6);
 			$("#pie").spinner({max:99,min:para7}).spinner("value",para7);
 			$("#mys").spinner({max:99,min:para8}).spinner("value",para8);
+			hpfunc($("#vit").spinner("value"));
+			fpfunc($("#mnd").spinner("value"));
+			stfunc($("#edr").spinner("value"));
+			cpfunc($("#edr").spinner("value"));
 		}
 	});
 });
@@ -136,7 +182,7 @@ $(function(){
 					--para0;break;
 			}
 			lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-//			hpfunc($("#str").spinner("value"));
+			hpfunc($("#vit").spinner("value"));
 		}
 	}).spinner("value",para1);
 	//精神力
@@ -153,6 +199,7 @@ $(function(){
 					--para0;break;
 			}
 			lvObj.innerHTML='<span id="lv">'+para0+'</span>';
+			fpfunc($("#mnd").spinner("value"));
 		}
 	}).spinner("value",para2);
 	//持久力
@@ -169,6 +216,8 @@ $(function(){
 					--para0;break;
 			}
 			lvObj.innerHTML='<span id="lv">'+para0+'</span>';
+			stfunc($("#edr").spinner("value"));
+			cpfunc($("#edr").spinner("value"));
 		}
 	}).spinner("value",para3);
 	//筋力
@@ -263,7 +312,7 @@ $(function(){
 				$("#vit").spinner("value",$("#vit").spinner("value")+10);
 				para0=para0+10;
 				lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-//				hpfunc($("#str").spinner("value"));
+				hpfunc($("#vit").spinner("value"));
 			}
  		});
 	$("#tendown1")
@@ -273,6 +322,7 @@ $(function(){
 				$("#vit").spinner("value",$("#vit").spinner("value")-10);
 				para0=para0-10;
 				lvObj.innerHTML='<span id="lv">'+para0+'</span>';
+				hpfunc($("#str").spinner("value"));
 			}
  		});
 	$("#tenup2")
@@ -282,6 +332,7 @@ $(function(){
 				$("#mnd").spinner("value",$("#mnd").spinner("value")+10);
 				para0=para0+10;
 				lvObj.innerHTML='<span id="lv">'+para0+'</span>';
+				fpfunc($("#mnd").spinner("value"));
 			}
  		});
 	$("#tendown2")
@@ -291,6 +342,7 @@ $(function(){
 				$("#mnd").spinner("value",$("#mnd").spinner("value")-10);
 				para0=para0-10;
 				lvObj.innerHTML='<span id="lv">'+para0+'</span>';
+				fpfunc($("#mnd").spinner("value"));
 			}
  		});
 	$("#tenup3")
@@ -300,6 +352,8 @@ $(function(){
 				$("#edr").spinner("value",$("#edr").spinner("value")+10);
 				para0=para0+10;
 				lvObj.innerHTML='<span id="lv">'+para0+'</span>';
+				stfunc($("#edr").spinner("value"));
+				cpfunc($("#edr").spinner("value"));
 			}
  		});
 	$("#tendown3")
@@ -309,6 +363,8 @@ $(function(){
 				$("#edr").spinner("value",$("#edr").spinner("value")-10);
 				para0=para0-10;
 				lvObj.innerHTML='<span id="lv">'+para0+'</span>';
+				stfunc($("#edr").spinner("value"));
+				cpfunc($("#edr").spinner("value"));
 			}
  		});
 	$("#tenup4")
@@ -402,3 +458,23 @@ $(function(){
 			}
  		});
  });
+//HP変化
+function hpfunc(val) {
+	var chObj=document.getElementById("hp");
+	chObj.innerHTML='<span id="hp">'+hpary[val]+'</span>';
+}
+//FP変化
+function fpfunc(val) {
+	var chObj=document.getElementById("fp");
+	chObj.innerHTML='<span id="fp">'+fpary[val]+'</span>';
+}
+//スタミナ変化
+function stfunc(val) {
+	var chObj=document.getElementById("st");
+	chObj.innerHTML='<span id="st">'+stary[val]+'</span>';
+}
+//重量変化
+function cpfunc(val) {
+	var chObj=document.getElementById("cp");
+	chObj.innerHTML='<span id="cp">'+cpary[val]/10+'</span>';
+}
