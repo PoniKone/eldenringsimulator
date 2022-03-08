@@ -87,7 +87,7 @@ header p {
 main {
 	width: 350px;
 	margin: 0px auto;
-	padding: 20px 0 20px 10px;
+	padding: 20px 0 20px 0px;
 	font-size: 16px;
 	font-family: 'NotoSans-M',sans-serif;
     border-top: solid 1px #bdbdbd;
@@ -101,6 +101,33 @@ main {
 	display: inline;
 }
 /* cnt1 */
+#skill {
+	position: relative;
+	display: block;
+	margin: 0 0 0px 0;
+	text-align: center;
+
+}
+#skill td {
+	width: 40rem;
+	text-align: right;
+}
+#hp {
+	color: #ff6d00;
+	font-size: 20px;
+}
+#st {
+	color: #6dff00;
+	font-size: 20px;
+}
+#fp {
+	color: #6dff;
+	font-size: 20px;
+}
+#cp {
+	color: #ff6d;
+	font-size: 20px;
+}
 #cnt2 {
 	margin: 20px 0 0 0;
 }
@@ -110,7 +137,7 @@ main {
 }
 #cnt2 li {
 	font-size: 14px;
-	margin: 10px 0 0 0;
+	margin: 0 0 0 0;
 	display: flex;
 	justify-content: flex-end;
 	align-items: center;
@@ -151,6 +178,7 @@ footer {
 	margin: 0 0 15px 0;
 	background-color: #757575;
 }
+
 @media screen and (max-width:759px){
 }
 @media screen and (min-width:760px){
