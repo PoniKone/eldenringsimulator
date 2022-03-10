@@ -1,1 +1,4 @@
-theme: jekyll-theme-cayman
+theme: jekyll-theme-hacker
+google_analytics: UA-222575641-1
+plugins:
+  - jekyll-sitemap
