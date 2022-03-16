@@ -1,7 +1,7 @@
 //素性一覧 [レベルlv,生命力vit,精神力mnd,持久力edr,筋力str,技量dex,知力int,信仰pie,神秘mys]
 const VAGABOND = [9,15,10,11,14,13,9,9,7];
 const WARRIOR = [8,11,12,11,10,16,10,8,9];
-const HERO = [7,14,9,12,16,9,7,8,14];
+const HERO = [7,14,9,12,16,9,7,8,1];
 const BANDIT = [5,10,11,10,9,13,9,8,14];
 const ASTROLOGER = [6,9,15,9,8,12,16,7,9];
 const PROPHET = [7,10,14,8,11,10,7,16,10];
