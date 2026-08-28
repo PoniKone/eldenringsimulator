@@ -1,482 +1,364 @@
+//============================================================
+// ELDENRING パラメータシミュレータ
+// 素性を追加するときは CLASSES に1行足すだけでOK
+//============================================================
+
 //素性一覧 [レベルlv,生命力vit,精神力mnd,持久力edr,筋力str,技量dex,知力int,信仰pie,神秘mys]
-const VAGABOND = [9,15,10,11,14,13,9,9,7];
-const WARRIOR = [8,11,12,11,10,16,10,8,9];
-const HERO = [7,14,9,12,16,9,7,8,11];
-const BANDIT = [5,10,11,10,9,13,9,8,14];
-const ASTROLOGER = [6,9,15,9,8,12,16,7,9];
-const PROPHET = [7,10,14,8,11,10,7,16,10];
-const SAMURAI = [9,12,11,13,12,15,9,8,8];
-const PRISONER = [9,11,12,11,11,14,14,6,9];
-const CONFESSOR = [10,10,13,10,12,12,9,14,9];
-const WRETCH = [1,10,10,10,10,10,10,10,10];
-var feature = new Array(9);//素性
+const CLASSES = [
+	{ name: '放浪騎士',       stats: [ 9,15,10,11,14,13, 9, 9, 7] },
+	{ name: '剣士',           stats: [ 8,11,12,11,10,16,10, 8, 9] },
+	{ name: '勇者',           stats: [ 7,14, 9,12,16, 9, 7, 8,11] },
+	{ name: '盗賊',           stats: [ 5,10,11,10, 9,13, 9, 8,14] },
+	{ name: '星見',           stats: [ 6, 9,15, 9, 8,12,16, 7, 9] },
+	{ name: '預言者',         stats: [ 7,10,14, 8,11,10, 7,16,10] },
+	{ name: '侍',             stats: [ 9,12,11,13,12,15, 9, 8, 8] },
+	{ name: '囚人',           stats: [ 9,11,12,11,11,14,14, 6, 9] },
+	{ name: '密使',           stats: [10,10,13,10,12,12, 9,14, 9] },
+	{ name: '素寒貧',         stats: [ 1,10,10,10,10,10,10,10,10] },
+	// Tarnished Pack (Ver.1.17 / 2026-08-28) で追加
+	{ name: 'イデスの騎士',   stats: [ 7,10,12,11,13,15, 8,11, 6] },
+	{ name: '重装騎士',       stats: [10,14, 8,17,15,11, 7, 8, 9] }
+];
 
-//初期値（放浪騎士）
-var para0=VAGABOND[0];
-var para1=VAGABOND[1];
-var para2=VAGABOND[2];
-var para3=VAGABOND[3];
-var para4=VAGABOND[4];
-var para5=VAGABOND[5];
-var para6=VAGABOND[6];
-var para7=VAGABOND[7];
-var para8=VAGABOND[8];
-var minpara0=para0;
-var minpara1=para1;
-var minpara2=para2;
-var minpara3=para3;
-var minpara4=para4;
-var minpara5=para5;
-var minpara6=para6;
-var minpara7=para7;
-var minpara8=para8;
+//能力値の定義（CLASSES の stats の並びと対応。index 0 はレベル）
+const STATS = [
+	{ key: 'vit', label: '生命' },
+	{ key: 'mnd', label: '精神' },
+	{ key: 'edr', label: '持久' },
+	{ key: 'str', label: '筋力' },
+	{ key: 'dex', label: '技量' },
+	{ key: 'int', label: '知力' },
+	{ key: 'pie', label: '信仰' },
+	{ key: 'mys', label: '神秘' }
+];
 
-//HP,FP,スタミナ,重量の配列
-var hpary = [0,0,0,0,0,0,0,0,0,394,
-	     414,434,455,476,499,522,547,572,598,624,
-	     652,680,709,738,769,800,833,870,910,951,
-	     994,1037,1081,1125,1170,1216,1262,1308,1355,1402,
-	     1450,1476,1503,1529,1555,1581,1606,1631,1656,1680,
-	     1704,1727,1750,1772,1793,1814,1834,1853,1871,1887,
-	     1900,1906,1912,1918,1924,1930,1936,1942,1948,1954,
-	     1959,1965,1971,1977,1982,1988,1993,1999,2004,2010,
-	     2015,2020,2026,2031,2036,2041,2046,2051,2056,2060,
-	     2065,2070,2074,2078,2082,2086,2090,2094,2097,2100];
+const MAX_STAT = 99;
+const MAX_LEVEL = 713;
+const STORAGE_KEY = 'eldenring-simulator-state';
 
-var fpary = [0,0,0,0,0,0,0,0,0,65,
-	     68,71,74,77,81,84,87,90,93,96,
-	     100,106,112,118,124,130,136,142,148,154,
-	     160,166,172,178,184,190,196,202,208,214,
-	     220,226,232,238,244,250,256,262,268,274,
-	     280,288,297,305,313,321,328,335,341,346,
-	     350,352,355,357,360,362,365,367,370,373,
-	     375,378,380,383,385,388,391,393,396,398,
-	     401,403,406,408,411,414,416,419,421,424,
-	     426,429,432,434,437,439,442,444,447,450];
+//------------------------------------------------------------
+// 派生ステータス表（添字＝能力値 1〜99。0番は未使用）
+//------------------------------------------------------------
+//HP（生命力）
+const HP = [0,
+	 300, 304, 312, 322, 334, 347, 362, 378, 396, 414,
+	 434, 455, 476, 499, 522, 547, 572, 598, 624, 652,
+	 680, 709, 738, 769, 800, 833, 870, 910, 951, 994,
+	1037,1081,1125,1170,1216,1262,1308,1355,1402,1450,
+	1476,1503,1529,1555,1581,1606,1631,1656,1680,1704,
+	1727,1750,1772,1793,1814,1834,1853,1871,1887,1900,
+	1906,1912,1918,1924,1930,1936,1942,1948,1954,1959,
+	1965,1971,1977,1982,1988,1993,1999,2004,2010,2015,
+	2020,2026,2031,2036,2041,2046,2051,2056,2060,2065,
+	2070,2074,2078,2082,2086,2090,2094,2097,2100];
 
-var stary = [0,0,0,0,0,0,0,0,90,91,
-	     92,94,95,97,98,100,101,103,105,106,
-	     108,110,111,113,115,116,118,120,121,123,
-	     125,126,128,129,131,132,134,135,137,138,
-	     140,141,143,144,146,147,149,150,152,153,
-	     155,155,155,155,156,156,156,157,157,157,
-	     158,158,158,158,159,159,159,160,160,160,
-	     161,161,161,162,162,162,162,163,163,163,
-	     164,164,164,165,165,165,166,166,166,166,
-	     167,167,167,168,168,168,169,169,169,170];
+//FP（精神力）
+const FP = [0,
+	  50,  53,  56,  59,  62,  66,  69,  72,  75,  78,
+	  82,  85,  88,  91,  95, 100, 105, 110, 116, 121,
+	 126, 131, 137, 142, 147, 152, 158, 163, 168, 173,
+	 179, 184, 189, 194, 200, 207, 214, 221, 228, 235,
+	 242, 248, 255, 262, 268, 275, 281, 287, 293, 300,
+	 305, 311, 317, 322, 328, 333, 338, 342, 346, 350,
+	 352, 355, 357, 360, 362, 365, 367, 370, 373, 375,
+	 378, 380, 383, 385, 388, 391, 393, 396, 398, 401,
+	 403, 406, 408, 411, 414, 416, 419, 421, 424, 426,
+	 429, 432, 434, 437, 439, 442, 444, 447, 450];
 
-var cpary = [0,0,0,0,0,0,0,0,450,466,
-	     482,498,514,529,545,561,577,593,609,625,
-	     641,656,672,688,704,720,730,741,752,764,
-	     776,789,802,815,828,841,854,868,881,895,
-	     909,923,937,951,965,979,994,1008,1022,1037,
-	     1052,1066,1081,1096,1110,1125,1140,1155,1170,1185,
-	     1200,1210,1221,1231,1241,1251,1262,1272,1282,1292,
-	     1303,1313,1323,1333,1344,1354,1364,1374,1385,1395,
-	     1405,1415,1426,1436,1446,1456,1467,1477,1487,1497,
-	     1508,1518,1528,1538,1549,1559,1569,1579,1590,160];
+//スタミナ（持久力）
+const STAMINA = [0,
+	  80,  81,  83,  85,  87,  88,  90,  92,  94,  96,
+	  97,  99, 101, 103, 105, 106, 108, 110, 111, 113,
+	 115, 116, 118, 120, 121, 123, 125, 126, 128, 130,
+	 131, 132, 133, 135, 136, 137, 138, 140, 141, 142,
+	 143, 145, 146, 147, 148, 150, 151, 152, 153, 155,
+	 155, 155, 155, 156, 156, 156, 157, 157, 157, 158,
+	 158, 158, 158, 159, 159, 159, 160, 160, 160, 161,
+	 161, 161, 162, 162, 162, 162, 163, 163, 163, 164,
+	 164, 164, 165, 165, 165, 166, 166, 166, 166, 167,
+	 167, 167, 168, 168, 168, 169, 169, 169, 170];
 
+//装備重量（持久力）※10倍の整数で保持
+const EQUIP = [0,
+	 450, 450, 450, 450, 450, 450, 450, 450, 466, 482,
+	 498, 514, 529, 545, 561, 577, 593, 609, 625, 641,
+	 656, 672, 688, 704, 720, 730, 741, 752, 764, 776,
+	 789, 802, 815, 828, 841, 854, 868, 881, 895, 909,
+	 923, 937, 951, 965, 979, 994,1008,1022,1037,1052,
+	1066,1081,1096,1110,1125,1140,1155,1170,1185,1200,
+	1210,1221,1231,1241,1251,1262,1272,1282,1292,1303,
+	1313,1323,1333,1344,1354,1364,1374,1385,1395,1405,
+	1415,1426,1436,1446,1456,1467,1477,1487,1497,1508,
+	1518,1528,1538,1549,1559,1569,1579,1590,1600];
 
-
-//初期ステータスを代入
-function addPar(status)
-{
-
-	for(let i = 0;i < 9;i++)
-	{
-		feature[i] = status[i];
-	}
-	return feature;
+//------------------------------------------------------------
+// 計算式
+//------------------------------------------------------------
+//レベルアップに必要なルーン（lvl → lvl+1）
+//本来の式は floor((max(0,(n-92)*0.02) + 0.1) * n^2 + 1) だが、
+//0.02 と 0.1 の誤差で切り捨てが1ずれる場合があるので100倍した整数で計算する
+function runeCost(lvl) {
+	var n = lvl + 81;
+	var k = Math.max(10, 2 * n - 174);
+	return Math.floor(k * n * n / 100) + 1;
 }
 
+//fromLv から toLv までの累計必要ルーン
+function runeTotal(fromLv, toLv) {
+	var sum = 0;
+	for (var i = fromLv; i < toLv; i++) sum += runeCost(i);
+	return sum;
+}
 
-//素性選択
-$(function(){
-	$("#classselect").selectmenu({
-		select:function(event,ui){
-	  		var lvObj=document.getElementById("lv");
-			val=$("select[name='classselect']").val();
-			switch(val){
-				case '1':
-					addPar(VAGABOND);//放浪騎士のステータスを配列に代入
-					break;
-				case '2':
-					addPar(WARRIOR);;//剣士のステータスを配列に代入
-					break;
-				case '3':
-					addPar(HERO);//勇者のステータスを配列に代入
-					break;
-				case '4':
-					addPar(BANDIT);//盗賊のステータスを配列に代入
-					break;
-				case '5':
-					addPar(ASTROLOGER);//星見のステータスを配列に代入
-					break;
-				case '6':
-					addPar(PROPHET);//預言者のステータスを配列に代入
-					break;
-				case '7':
-					addPar(SAMURAI);//侍のステータスを配列に代入
-					break;
-				case '8':
-					addPar(PRISONER);//囚人のステータスを配列に代入
-					break;
-				case '9':
-					addPar(CONFESSOR);//密使のステータスを配列に代入
-					break;
-				case '10':
-					addPar(WRETCH);//素寒貧のステータスを配列に代入
-			}
-			//値を設定
-			para0=feature[0];
-			para1=feature[1];
-			para2=feature[2];
-			para3=feature[3];
-			para4=feature[4];
-			para5=feature[5];
-			para6=feature[6];
-			para7=feature[7];
-			para8=feature[8];
-			//最低値の設定
-			minpara0=para0;
-			minpara1=para1;
-			minpara2=para2;
-			minpara3=para3;
-			minpara4=para4;
-			minpara5=para5;
-			minpara6=para6;
-			minpara7=para7;
-			minpara8=para8;
-			//値を反映
-			lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-			$("#vit").spinner({max:99,min:para1}).spinner("value",para1);
-			$("#mnd").spinner({max:99,min:para2}).spinner("value",para2);
-			$("#edr").spinner({max:99,min:para3}).spinner("value",para3);
-			$("#str").spinner({max:99,min:para4}).spinner("value",para4);
-			$("#dex").spinner({max:99,min:para5}).spinner("value",para5);
-			$("#int").spinner({max:99,min:para6}).spinner("value",para6);
-			$("#pie").spinner({max:99,min:para7}).spinner("value",para7);
-			$("#mys").spinner({max:99,min:para8}).spinner("value",para8);
-			hpfunc($("#vit").spinner("value"));
-			fpfunc($("#mnd").spinner("value"));
-			stfunc($("#edr").spinner("value"));
-			cpfunc($("#edr").spinner("value"));
+//耐性のレベル依存分（免疫・頑健・正気・抗死で共通）
+function resistByLevel(lvl) {
+	var n = lvl + 79;
+	if (lvl <= 71)  return  75 + 30 * ((n -   1) / 149);
+	if (lvl <= 111) return 105 + 40 * ((n - 150) /  40);
+	if (lvl <= 161) return 145 + 15 * ((n - 190) /  50);
+	return                  160 + 20 * ((n - 240) / 552);
+}
+
+//耐性の能力値依存分（免疫←生命力 / 頑健←持久力 / 正気←精神力）
+function resistByStat(v) {
+	if (v <= 30) return 0;
+	if (v <= 40) return      30 * ((v - 30) / 10);
+	if (v <= 60) return 30 + 10 * ((v - 40) / 20);
+	return              40 + 10 * ((v - 60) / 39);
+}
+
+//抗死の能力値依存分（←神秘。ソフトキャップの位置が他と違う）
+function resistByArcane(v) {
+	if (v <= 15) return v;
+	if (v <= 40) return 15 + 15 * ((v - 15) / 25);
+	if (v <= 60) return 30 + 10 * ((v - 40) / 20);
+	return              40 + 10 * ((v - 60) / 39);
+}
+
+//------------------------------------------------------------
+// 状態
+//------------------------------------------------------------
+var ready = false;                 //スピナー初期化完了フラグ
+var classIndex = 0;                //選択中の素性
+var baseStats = CLASSES[0].stats;  //初期値（＝各能力値の下限）
+
+function $stat(key) { return $('#' + key); }
+function baseOf(key) {
+	return baseStats[STATS.findIndex(function(s){ return s.key === key; }) + 1];
+}
+
+//直接入力された値を [初期値, 99] に丸める（jQuery UI spinner は入力値を丸めてくれない）
+var clamping = false;
+function clampInput(key) {
+	if (clamping) return;
+	clamping = true;
+	var el = $stat(key);
+	var min = baseOf(key);
+	var raw = parseInt(el.val(), 10);
+	if (isNaN(raw)) raw = min;
+	el.spinner('value', Math.min(MAX_STAT, Math.max(min, raw)));
+	clamping = false;
+}
+
+function setText(id, text) {
+	document.getElementById(id).textContent = text;
+}
+
+//現在値を取得（spin 中は確定前の値を override で受け取る）
+function valueOf(key, overrideKey, overrideVal) {
+	return key === overrideKey ? overrideVal : $stat(key).spinner('value');
+}
+
+//レベル＝素性の初期レベル＋振った合計。差分ではなく毎回計算し直す
+function refresh(overrideKey, overrideVal) {
+	if (!ready) return;
+	var cur = {};
+	var level = baseStats[0];
+	STATS.forEach(function(s, i) {
+		cur[s.key] = valueOf(s.key, overrideKey, overrideVal);
+		level += cur[s.key] - baseStats[i + 1];
+	});
+
+	setText('lv', level);
+	setText('hp', HP[cur.vit]);
+	setText('fp', FP[cur.mnd]);
+	setText('st', STAMINA[cur.edr]);
+	setText('cp', (EQUIP[cur.edr] / 10).toFixed(1));
+
+	//耐性（防具なしの素の値）
+	var lvPart = resistByLevel(level);
+	setText('imn', Math.floor(lvPart + resistByStat(cur.vit)));
+	setText('rbs', Math.floor(lvPart + resistByStat(cur.edr)));
+	setText('fcs', Math.floor(lvPart + resistByStat(cur.mnd)));
+	setText('dth', Math.floor(lvPart + resistByArcane(cur.mys)));
+
+	//必要ルーン
+	setText('rune', runeTotal(baseStats[0], level).toLocaleString());
+	setText('runenext', level < MAX_LEVEL ? runeCost(level).toLocaleString() : '—');
+
+	saveState(cur);
+}
+
+//素性の切り替え（能力値は初期値に戻す）
+function applyClass(index) {
+	classIndex = index;
+	baseStats = CLASSES[index].stats;
+	STATS.forEach(function(s, i) {
+		var base = baseStats[i + 1];
+		$stat(s.key).spinner('option', 'min', base).spinner('value', base);
+	});
+	refresh();
+}
+
+//10UP / 10DOWN（99 や下限に張り付いた分もレベルへ正しく反映する）
+function step(key, delta) {
+	var el = $stat(key);
+	var min = baseOf(key);
+	var now = el.spinner('value');
+	var next = Math.min(MAX_STAT, Math.max(min, now + delta));
+	if (next === now) return;
+	el.spinner('value', next);
+	refresh();
+}
+
+//------------------------------------------------------------
+// URL共有 / 保存
+//------------------------------------------------------------
+//現在の状態を URL のハッシュと localStorage に書き出す
+function saveState(cur) {
+	var hash = '#c=' + classIndex + '&s=' +
+		STATS.map(function(s){ return cur[s.key]; }).join('.');
+	if (location.hash !== hash) {
+		try {
+			history.replaceState(null, '', location.pathname + location.search + hash);
+		} catch (e) {
+			//file:// で開いた場合など replaceState が拒否される環境がある
+		}
+	}
+	try {
+		localStorage.setItem(STORAGE_KEY, hash);
+	} catch (e) {
+		//プライベートモード等で保存できなくても動作に支障はないので握りつぶす
+	}
+}
+
+//"#c=0&s=15.10.11.14.13.9.9.7" を解釈する。壊れていれば null
+function parseState(hash) {
+	var m = /^#c=(\d+)&s=([\d.]+)$/.exec(hash || '');
+	if (!m) return null;
+	var ci = parseInt(m[1], 10);
+	if (!CLASSES[ci]) return null;
+	var vals = m[2].split('.').map(function(v){ return parseInt(v, 10); });
+	if (vals.length !== STATS.length) return null;
+	var base = CLASSES[ci].stats;
+	for (var i = 0; i < vals.length; i++) {
+		if (isNaN(vals[i]) || vals[i] < base[i + 1] || vals[i] > MAX_STAT) return null;
+	}
+	return { classIndex: ci, values: vals };
+}
+
+//URL → localStorage → 素性の初期値、の優先順で復元
+function restoreState() {
+	var state = parseState(location.hash);
+	if (!state) {
+		try {
+			state = parseState(localStorage.getItem(STORAGE_KEY));
+		} catch (e) {
+			state = null;
+		}
+	}
+	if (!state) return;
+
+	classIndex = state.classIndex;
+	baseStats = CLASSES[classIndex].stats;
+	$('#classselect').val(classIndex);
+	STATS.forEach(function(s, i) {
+		$stat(s.key)
+			.spinner('option', 'min', baseStats[i + 1])
+			.spinner('value', state.values[i]);
+	});
+}
+
+//クリップボードAPIが使えない・拒否された場合のフォールバック
+function legacyCopy(text) {
+	var tmp = document.createElement('textarea');
+	tmp.value = text;
+	tmp.setAttribute('readonly', '');
+	tmp.style.position = 'fixed';
+	tmp.style.top = '0';
+	tmp.style.opacity = '0';
+	document.body.appendChild(tmp);
+	tmp.select();
+	if (tmp.setSelectionRange) tmp.setSelectionRange(0, text.length);
+	var ok = false;
+	try {
+		ok = document.execCommand('copy');
+	} catch (e) {
+		ok = false;
+	}
+	document.body.removeChild(tmp);
+	return ok;
+}
+
+//URLをクリップボードへ
+function copyUrl() {
+	var msg = document.getElementById('sharemsg');
+	var url = location.href;
+	function done(ok) {
+		msg.textContent = ok ? 'URLをコピーしました' : 'コピーできませんでした';
+		setTimeout(function(){ msg.textContent = ''; }, 2000);
+	}
+	if (navigator.clipboard && window.isSecureContext) {
+		navigator.clipboard.writeText(url)
+			.then(function(){ done(true); })
+			.catch(function(){ done(legacyCopy(url)); });
+		return;
+	}
+	done(legacyCopy(url));
+}
+
+//------------------------------------------------------------
+// 初期化
+//------------------------------------------------------------
+$(function() {
+	//素性のプルダウンを CLASSES から生成
+	var $select = $('#classselect');
+	$select.empty();
+	CLASSES.forEach(function(cls, i) {
+		$select.append($('<option>').val(i).text(cls.name));
+	});
+
+	//能力値スピナー
+	STATS.forEach(function(s, i) {
+		$stat(s.key).spinner({
+			min: baseStats[i + 1],
+			max: MAX_STAT,
+			spin: function(event, ui) { refresh(s.key, ui.value); },
+			change: function() { clampInput(s.key); refresh(); },
+			stop: function() { refresh(); }
+		}).spinner('value', baseStats[i + 1]);
+	});
+
+	//10UP / 10DOWN ボタン
+	STATS.forEach(function(s, i) {
+		$('#tenup' + (i + 1)).button().on('click', function() { step(s.key, 10); });
+		$('#tendown' + (i + 1)).button().on('click', function() { step(s.key, -10); });
+	});
+
+	//URL・localStorage から復元（selectmenu 生成前に select の値を決める）
+	restoreState();
+
+	//素性選択
+	$select.selectmenu({
+		select: function(event, ui) {
+			applyClass(parseInt(ui.item.value, 10));
 		}
 	});
+
+	//共有・リセット
+	$('#share').button().on('click', copyUrl);
+	$('#reset').button().on('click', function() { applyClass(classIndex); });
+
+	ready = true;
+	refresh();
 });
-
-
-$(function(){
-	var var1;
-	var var2;
-	var lvObj=document.getElementById("lv");
-	//生命力
-	$("#vit").spinner({max:99,min:para1,
-		start:function(event,ui){
-			var1=$("#vit").spinner("value");
-		},
-		stop:function(event,ui){
-			var2=$("#vit").spinner("value");
-			switch(var2-var1){
-				case 1:
-					++para0;break;
-				case -1:
-					--para0;break;
-			}
-			lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-			hpfunc($("#vit").spinner("value"));
-		}
-	}).spinner("value",para1);
-	//精神力
-	$("#mnd").spinner({max:99,min:para2,
-		start:function(event,ui){
-			var1=$("#mnd").spinner("value");
-		},
-		stop:function(event,ui){
-			var2=$("#mnd").spinner("value");
-			switch(var2-var1){
-				case 1:
-					++para0;break;
-				case -1:
-					--para0;break;
-			}
-			lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-			fpfunc($("#mnd").spinner("value"));
-		}
-	}).spinner("value",para2);
-	//持久力
-	$("#edr").spinner({max:99,min:para3,
-		start:function(event,ui){
-			var1=$("#edr").spinner("value");
-		},
-		stop:function(event,ui){
-			var2=$("#edr").spinner("value");
-			switch(var2-var1){
-				case 1:
-					++para0;break;
-				case -1:
-					--para0;break;
-			}
-			lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-			stfunc($("#edr").spinner("value"));
-			cpfunc($("#edr").spinner("value"));
-		}
-	}).spinner("value",para3);
-	//筋力
-	$("#str").spinner({max:99,min:para4,
-		start:function(event,ui){
-			var1=$("#str").spinner("value");
-		},
-		stop:function(event,ui){
-			var2=$("#str").spinner("value");
-			switch(var2-var1){
-				case 1:
-					++para0;break;
-				case -1:
-					--para0;break;
-			}
-			lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-		}
-	}).spinner("value",para4);
-	//技量
-	$("#dex").spinner({max:99,min:para5,
-		start:function(event,ui){
-			var1=$("#dex").spinner("value");
-		},
-		stop:function(event,ui){
-			var2=$("#dex").spinner("value");
-			switch(var2-var1){
-				case 1:
-					++para0;break;
-				case -1:
-					--para0;break;
-			}
-			lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-		}
-	}).spinner("value",para5);
-	//知力
-	$("#int").spinner({max:99,min:para6,
-		start:function(event,ui){
-			var1=$("#int").spinner("value");
-		},
-		stop:function(event,ui){
-			var2=$("#int").spinner("value");
-			switch(var2-var1){
-				case 1:
-					++para0;break;
-				case -1:
-					--para0;break;
-			}
-			lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-		}
-	}).spinner("value",para6);
-	//信仰
-	$("#pie").spinner({max:99,min:para7,
-		start:function(event,ui){
-			var1=$("#pie").spinner("value");
-		},
-		stop:function(event,ui){
-			var2=$("#pie").spinner("value");
-			switch(var2-var1){
-				case 1:
-					++para0;break;
-				case -1:
-					--para0;break;
-			}
-			lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-		}
-	}).spinner("value",para7);
-	//神秘
-	$("#mys").spinner({max:99,min:para8,
-		start:function(event,ui){
-			var1=$("#mys").spinner("value");
-		},
-		stop:function(event,ui){
-			var2=$("#mys").spinner("value");
-			switch(var2-var1){
-				case 1:
-					++para0;break;
-				case -1:
-					--para0;break;
-			}
-			lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-		}
-	}).spinner("value",para8);
-});
-
-//10ずつ変化
-$(function(){
-	var lvObj=document.getElementById("lv");
-	$("#tenup1")
-     	.button()
-		.click(function() {
-			if($("#vit").spinner("value")<90){
-				$("#vit").spinner("value",$("#vit").spinner("value")+10);
-				para0=para0+10;
-				lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-				hpfunc($("#vit").spinner("value"));
-			}
- 		});
-	$("#tendown1")
-     	.button()
-		.click(function() {
-			if($("#vit").spinner("value")>=minpara1+10){
-				$("#vit").spinner("value",$("#vit").spinner("value")-10);
-				para0=para0-10;
-				lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-				hpfunc($("#").spinner("value"));
-			}
- 		});
-	$("#tenup2")
-     	.button()
-		.click(function() {
-			if($("#mnd").spinner("value")<90){
-				$("#mnd").spinner("value",$("#mnd").spinner("value")+10);
-				para0=para0+10;
-				lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-				fpfunc($("#mnd").spinner("value"));
-			}
- 		});
-	$("#tendown2")
-     	.button()
-		.click(function() {
-			if($("#mnd").spinner("value")>=minpara2+10){
-				$("#mnd").spinner("value",$("#mnd").spinner("value")-10);
-				para0=para0-10;
-				lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-				fpfunc($("#mnd").spinner("value"));
-			}
- 		});
-	$("#tenup3")
-     	.button()
-		.click(function() {
-			if($("#edr").spinner("value")<90){
-				$("#edr").spinner("value",$("#edr").spinner("value")+10);
-				para0=para0+10;
-				lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-				stfunc($("#edr").spinner("value"));
-				cpfunc($("#edr").spinner("value"));
-			}
- 		});
-	$("#tendown3")
-     	.button()
-		.click(function() {
-			if($("#edr").spinner("value")>=minpara3+10){
-				$("#edr").spinner("value",$("#edr").spinner("value")-10);
-				para0=para0-10;
-				lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-				stfunc($("#edr").spinner("value"));
-				cpfunc($("#edr").spinner("value"));
-			}
- 		});
-	$("#tenup4")
-     	.button()
-		.click(function() {
-			if($("#str").spinner("value")<90){
-				$("#str").spinner("value",$("#str").spinner("value")+10);
-				para0=para0+10;
-				lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-			}
- 		});
-	$("#tendown4")
-     	.button()
-		.click(function() {
-			if($("#str").spinner("value")>=minpara4+10){
-				$("#str").spinner("value",$("#str").spinner("value")-10);
-				para0=para0-10;
-				lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-			}
- 		});
-	$("#tenup5")
-     	.button()
-		.click(function() {
-			if($("#dex").spinner("value")<90){
-				$("#dex").spinner("value",$("#dex").spinner("value")+10);
-				para0=para0+10;
-				lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-			}
- 		});
-	$("#tendown5")
-     	.button()
-		.click(function() {
-			if($("#dex").spinner("value")>=minpara5+10){
-				$("#dex").spinner("value",$("#dex").spinner("value")-10);
-				para0=para0-10;
-				lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-			}
- 		});
-	$("#tenup6")
-     	.button()
-		.click(function() {
-			if($("#int").spinner("value")<90){
-				$("#int").spinner("value",$("#int").spinner("value")+10);
-				para0=para0+10;
-				lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-			}
- 		});
-	$("#tendown6")
-     	.button()
-		.click(function() {
-			if($("#int").spinner("value")>=minpara6+10){
-				$("#int").spinner("value",$("#int").spinner("value")-10);
-				para0=para0-10;
-				lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-			}
- 		});
-	$("#tenup7")
-     	.button()
-		.click(function() {
-			if($("#pie").spinner("value")<90){
-				$("#pie").spinner("value",$("#pie").spinner("value")+10);
-				para0=para0+10;
-				lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-			}
- 		});
-	$("#tendown7")
-     	.button()
-		.click(function() {
-			if($("#pie").spinner("value")>=minpara7+10){
-				$("#pie").spinner("value",$("#pie").spinner("value")-10);
-				para0=para0-10;
-				lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-			}
- 		});
-	$("#tenup8")
-     	.button()
-		.click(function() {
-			if($("#mys").spinner("value")<90){
-				$("#mys").spinner("value",$("#mys").spinner("value")+10);
-				para0=para0+10;
-				lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-			}
- 		});
-	$("#tendown8")
-     	.button()
-		.click(function() {
-			if($("#mys").spinner("value")>=minpara8+10){
-				$("#mys").spinner("value",$("#mys").spinner("value")-10);
-				para0=para0-10;
-				lvObj.innerHTML='<span id="lv">'+para0+'</span>';
-			}
- 		});
- });
-//HP変化
-function hpfunc(val) {
-	var chObj=document.getElementById("hp");
-	chObj.innerHTML='<span id="hp">'+hpary[val]+'</span>';
-}
-//FP変化
-function fpfunc(val) {
-	var chObj=document.getElementById("fp");
-	chObj.innerHTML='<span id="fp">'+fpary[val]+'</span>';
-}
-//スタミナ変化
-function stfunc(val) {
-	var chObj=document.getElementById("st");
-	chObj.innerHTML='<span id="st">'+stary[val]+'</span>';
-}
-//重量変化
-function cpfunc(val) {
-	var chObj=document.getElementById("cp");
-	chObj.innerHTML='<span id="cp">'+cpary[val]/10+'</span>';
-}

@@ -74,10 +74,14 @@ a:hover {
 }
 
 /* header */
+header,main,footer {
+	box-sizing: border-box;
+}
 header {
-	width: 350px;
+	width: 100%;
+	max-width: 350px;
 	margin: 0 auto;
-	padding: 20px 0 20px 10px;
+	padding: 20px 10px 20px 10px;
 }
 header p {
 	margin: 15px 0 0 0;
@@ -85,9 +89,10 @@ header p {
 
 /* main */
 main {
-	width: 350px;
+	width: 100%;
+	max-width: 366px;
 	margin: 0px auto;
-	padding: 20px 0 20px 0px;
+	padding: 20px 8px 20px 8px;
 	font-size: 16px;
 	font-family: 'NotoSans-M',sans-serif;
     border-top: solid 1px #bdbdbd;
@@ -96,21 +101,25 @@ main {
 /* cnt1 */
 #classselect {
 	width: 283px;
+	max-width: 100%;
+}
+.ui-selectmenu-button {
+	max-width: 100%;
 }
 #cnt1 p {
 	display: inline;
 }
 /* cnt1 */
 #skill {
-	position: relative;
-	display: block;
+	display: table;
+	width: 100%;
+	table-layout: fixed;
 	margin: 0 0 0px 0;
-	text-align: center;
-
 }
 #skill td {
-	width: 40rem;
+	width: 25%;
 	text-align: right;
+	padding: 0 6px 0 0;
 }
 #hp {
 	color: #ff6d00;
@@ -121,11 +130,11 @@ main {
 	font-size: 20px;
 }
 #fp {
-	color: #6dff;
+	color: #006dff;
 	font-size: 20px;
 }
 #cp {
-	color: #ff6d;
+	color: #ff006d;
 	font-size: 20px;
 }
 #cnt2 {
@@ -161,11 +170,60 @@ main {
 	font-size: 12px;
 }
 
+/* 状態異常耐性・必要ルーン */
+#resist,#runes {
+	display: table;
+	width: 100%;
+	table-layout: fixed;
+	margin: 12px 0 0 0;
+}
+#resist td {
+	width: 25%;
+	text-align: right;
+	padding: 0 6px 0 0;
+}
+#runes td {
+	text-align: right;
+	padding: 0 6px 0 0;
+	font-size: 14px;
+}
+#runes td:first-child {
+	width: 60%;
+}
+#imn,#rbs,#fcs,#dth {
+	color: #ffb300;
+	font-size: 18px;
+}
+#rune,#runenext {
+	color: #bdbdbd;
+	font-size: 16px;
+}
+
+/* 共有・リセット */
+#controls {
+	margin: 20px 0 0 0;
+	text-align: center;
+}
+#controls button {
+	width: auto;
+	height: 32px;
+	padding: 0 12px;
+	margin: 0 3px;
+}
+#sharemsg {
+	display: block;
+	margin: 8px 0 0 0;
+	min-height: 1.2em;
+	font-size: 12px;
+	color: #6dff00;
+}
+
 /* footer*/
 footer {
-	width: 350px;
+	width: 100%;
+	max-width: 350px;
 	margin: 0 auto;
-	padding: 20px 0 20px 10px;
+	padding: 20px 10px 20px 10px;
 	font-size: 12px;
 }
 #social {
@@ -179,7 +237,32 @@ footer {
 	background-color: #757575;
 }
 
-@media screen and (max-width:759px){
-}
-@media screen and (min-width:760px){
+/* 狭い画面では余白と各パーツを詰める */
+@media screen and (max-width:400px){
+	#cnt2 p {
+		margin: 0 0 20px 10px;
+	}
+	#cnt2 li {
+		font-size: 13px;
+		flex-wrap: wrap;
+	}
+	#cnt2 input {
+		width: 60px;
+		height: 28px;
+		font-size: 20px;
+	}
+	#cnt2 button {
+		width: 64px;
+		height: 34px;
+		font-size: 11px;
+	}
+	#resist td,#runes td {
+		font-size: 13px;
+	}
+	#imn,#rbs,#fcs,#dth {
+		font-size: 16px;
+	}
+	#hp,#st,#fp,#cp {
+		font-size: 18px;
+	}
 }

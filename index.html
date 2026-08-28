@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,15 +15,15 @@
 		<meta name="twitter:card" content="summary" />
 		<meta name="twitter:site" content="@PoneKoni" />
 		<meta name="twitter:title" content="ELDENRINGパラメータシミュレータ" />
-		<meta name="twitter:description" content="フロムソフトウェアのタイトル「ELDENRING」におけるキャラ育成用のパラメータシミュレータ\n画像引用元:https://www.eldenring.jp/" />
+		<meta name="twitter:description" content="フロムソフトウェアのタイトル「ELDENRING」におけるキャラ育成用のパラメータシミュレータ。Tarnished Packの新素性「イデスの騎士」「重装騎士」に対応。画像引用元:https://www.eldenring.jp/" />
 		<meta name="twitter:image:src" content="https://www.eldenring.jp/resources/images/common/ogp/ogp_image.png">
-		<meta name="keywords" content="エルデンリング,ELDENRING,パラメータ,シミュレータ,素性,ビルド">
-		<meta name="description" content="ELDENRING(エルデンリング)パラメータシミュレータ">
+		<meta name="keywords" content="エルデンリング,ELDENRING,パラメータ,シミュレータ,素性,ビルド,イデスの騎士,重装騎士,Tarnished Pack">
+		<meta name="description" content="ELDENRING(エルデンリング)パラメータシミュレータ。全12素性の初期ステータスからレベル・HP・FP・スタミナ・装備重量・状態異常耐性・必要ルーンを計算し、ビルドをURLで共有できます。">
 		<title>ELDENRINGパラメータシミュレータ</title>
 		<link rel="stylesheet" href="style.css">
-		<link href="jquery-ui-1.13.1/jquery-ui.css" rel="stylesheet">
-		<script src="jquery-ui-1.13.1/external/jquery/jquery.js"></script>
-		<script src="jquery-ui-1.13.1/jquery-ui.js"></script>
+		<link href="jquery-ui-1.14.2/jquery-ui.css" rel="stylesheet">
+		<script src="jquery-ui-1.14.2/external/jquery/jquery.js"></script>
+		<script src="jquery-ui-1.14.2/jquery-ui.js"></script>
 	</head>
 	<body style="padding: 0px;">
 	<header>
@@ -32,26 +32,17 @@
 			パラメータシミュレータ
 		</h1>
 		<p>
-			素性選択後、各能力値を変更してください。<br>
-			現在のレベル・生命力・精神力・持久力・筋力・技量・知力・信仰・神秘の値が表示されます。<br>
+			素性選択後、各能力値を変更してください。数値は直接入力もできます。<br>
+			レベル・HP・FP・スタミナ・装備重量・状態異常耐性・必要ルーンが表示されます。<br>
+			内容は自動で保存され、URLをコピーすればそのまま共有できます。<br>
 			キャラクターの育成プラン作成にお使いください。
 		</p>
 	</header>
 		<main>
 			<div id="cnt1">
 				<p>素性:</p>
-				<select name="classselect" id="classselect" style="display: none;">
-					<option value="1">放浪騎士</option>
-					<option value="2">剣士</option>
-					<option value="3">勇者</option>
-					<option value="4">盗賊</option>
-					<option value="5">星見</option>
-					<option value="6">預言者</option>
-					<option value="7">侍</option>
-					<option value="8">囚人</option>
-					<option value="9">密使</option>
-					<option value="10">素寒貧</option>
-				</select>
+				<!-- 選択肢は main.js の CLASSES から生成 -->
+				<select name="classselect" id="classselect" style="display: none;"></select>
 			</div>
 			<div id="cnt2">
 				<p>
@@ -63,19 +54,43 @@
 						<td>HP:</td>
 						<td><span id=hp>522</span></td>
 						<td>FP:</td>
-						<td><span id=fp>68</span></td>
+						<td><span id=fp>78</span></td>
 					</tr>
 					<tr>
 						<td>スタミナ:</td>
-						<td><span id=st>94</span></td>
+						<td><span id=st>97</span></td>
 						<td>重量:</td>
 						<td><span id=cp>49.8</span></td>	
+					</tr>
+				</table>
+				<table id="resist">
+					<tr>
+						<td>免疫:</td>
+						<td><span id=imn>92</span></td>
+						<td>頑健:</td>
+						<td><span id=rbs>92</span></td>
+					</tr>
+					<tr>
+						<td>正気:</td>
+						<td><span id=fcs>92</span></td>
+						<td>抗死:</td>
+						<td><span id=dth>99</span></td>
+					</tr>
+				</table>
+				<table id="runes">
+					<tr>
+						<td>必要ルーン(累計):</td>
+						<td><span id=rune>0</span></td>
+					</tr>
+					<tr>
+						<td>次のレベルまで:</td>
+						<td><span id=runenext>811</span></td>
 					</tr>
 				</table>
 				<ul>
 					<li>
 						生命:&nbsp;
-						<span><input id="vit" readonly></span>
+						<span><input id="vit"></span>
 						<button id="tenup1" role="button">
 							<span class="ui-button-text">10UP</span>
 						</button>
@@ -85,7 +100,7 @@
 					</li>
 					<li>
 						精神:&nbsp;
-						<span><input id="mnd" readonly></span>
+						<span><input id="mnd"></span>
 						<button id="tenup2" role="button">
 							<span class="ui-button-text">10UP</span>
 						</button>
@@ -95,7 +110,7 @@
 					</li>
 					<li>
 						持久:&nbsp;
-						<span><input id="edr" readonly></span>
+						<span><input id="edr"></span>
 						<button id="tenup3" role="button">
 							<span class="ui-button-text">10UP</span>
 						</button>
@@ -105,7 +120,7 @@
 					</li>
 					<li>
 						筋力:&nbsp;
-						<span><input id="str" readonly></span>
+						<span><input id="str"></span>
 						<button id="tenup4" role="button">
 							<span class="ui-button-text">10UP</span>
 						</button>
@@ -115,7 +130,7 @@
 					</li>
 					<li>
 						技量:&nbsp;
-						<span><input id="dex" readonly></span>
+						<span><input id="dex"></span>
 						<button id="tenup5" role="button">
 							<span class="ui-button-text">10UP</span>
 						</button>
@@ -125,7 +140,7 @@
 					</li>
 					<li>
 						知力:&nbsp;
-						<span><input id="int" readonly></span>
+						<span><input id="int"></span>
 						<button id="tenup6" role="button">
 							<span class="ui-button-text">10UP</span>
 						</button>
@@ -135,7 +150,7 @@
 					</li>
 					<li>
 						信仰:&nbsp;
-						<span><input id="pie" readonly></span>
+						<span><input id="pie"></span>
 						<button id="tenup7" role="button">
 							<span class="ui-button-text">10UP</span>
 						</button>
@@ -145,7 +160,7 @@
 					</li>
 					<li>
 						神秘:&nbsp;
-						<span><input id="mys" readonly></span>
+						<span><input id="mys"></span>
 						<button id="tenup8" role="button">
 							<span class="ui-button-text">10UP</span>
 						</button>
@@ -154,8 +169,23 @@
 						</button>
 					</li>
 				</ul>
+				<div id="controls">
+					<button id="share" role="button">
+						<span class="ui-button-text">URLをコピー</span>
+					</button>
+					<button id="reset" role="button">
+						<span class="ui-button-text">リセット</span>
+					</button>
+					<span id="sharemsg"></span>
+				</div>
 			</div>
 		</main>
+		<footer>
+			<p>
+				Ver.1.17 / Tarnished Pack 対応（2026/08/28 更新）<br>
+				<a href="https://github.com/PoniKone/eldenringsimulator">GitHub</a>
+			</p>
+		</footer>
 		<script type="text/javascript" src="main.js"></script>
 	</body>
 </html>
