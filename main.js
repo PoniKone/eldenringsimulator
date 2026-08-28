@@ -301,12 +301,25 @@ function legacyCopy(text) {
 }
 
 //URLをクリップボードへ
+//スマホではクリップボードAPIが拒否されることがあるので、
+//失敗したらURLを入力欄に出して手動でコピーできるようにする
 function copyUrl() {
 	var msg = document.getElementById('sharemsg');
+	var field = document.getElementById('shareurl');
 	var url = location.href;
+	field.value = url;
+
 	function done(ok) {
-		msg.textContent = ok ? 'URLをコピーしました' : 'コピーできませんでした';
-		setTimeout(function(){ msg.textContent = ''; }, 2000);
+		if (ok) {
+			field.style.display = 'none';
+			msg.textContent = 'URLをコピーしました';
+			setTimeout(function(){ msg.textContent = ''; }, 2000);
+		} else {
+			field.style.display = 'block';
+			field.focus();
+			field.select();
+			msg.textContent = '下のURLを選択してコピーしてください';
+		}
 	}
 	if (navigator.clipboard && window.isSecureContext) {
 		navigator.clipboard.writeText(url)
@@ -345,14 +358,13 @@ $(function() {
 		$('#tendown' + (i + 1)).button().on('click', function() { step(s.key, -10); });
 	});
 
-	//URL・localStorage から復元（selectmenu 生成前に select の値を決める）
+	//URL・localStorage から復元
 	restoreState();
 
 	//素性選択
-	$select.selectmenu({
-		select: function(event, ui) {
-			applyClass(parseInt(ui.item.value, 10));
-		}
+	//jQuery UI の selectmenu はタッチで開かないため、ネイティブの select をそのまま使う
+	$select.on('change', function() {
+		applyClass(parseInt(this.value, 10));
 	});
 
 	//共有・リセット

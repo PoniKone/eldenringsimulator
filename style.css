@@ -102,9 +102,19 @@ main {
 #classselect {
 	width: 283px;
 	max-width: 100%;
+	height: 36px;
+	padding: 4px 6px;
+	/* iOSはfont-sizeが16px未満だとフォーカス時に画面を拡大するので16px以上にする */
+	font-size: 16px;
+	font-family: 'NotoSans',sans-serif;
+	color: #fff;
+	background-color: #333;
+	border: solid 1px #bdbdbd;
+	border-radius: 3px;
 }
-.ui-selectmenu-button {
-	max-width: 100%;
+#classselect option {
+	color: #fff;
+	background-color: #333;
 }
 #cnt1 p {
 	display: inline;
@@ -216,6 +226,21 @@ main {
 	min-height: 1.2em;
 	font-size: 12px;
 	color: #6dff00;
+}
+/* クリップボードが使えない環境で手動コピーするためのURL欄 */
+/* #cnt2 input より詳細度を上げないと幅などが上書きされる */
+#controls #shareurl {
+	display: none;
+	width: 100%;
+	height: auto;
+	margin: 4px 0 0 0;
+	padding: 6px;
+	box-sizing: border-box;
+	font-size: 16px;
+	text-align: left;
+	color: #fff;
+	background-color: #333;
+	border: solid 1px #bdbdbd;
 }
 
 /* footer*/
