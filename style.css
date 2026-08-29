@@ -251,6 +251,12 @@ footer {
 	padding: 20px 10px 20px 10px;
 	font-size: 12px;
 }
+#notice {
+	margin: 12px 0 0 0;
+	font-size: 11px;
+	line-height: 1.6em;
+	color: #9e9e9e;
+}
 #social {
 	width: 320px;
 	margin: 15px 0 0 0;
