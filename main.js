@@ -110,6 +110,15 @@ function runeTotal(fromLv, toLv) {
 	return sum;
 }
 
+//ローリングの種類が変わる装備重量の上限（0.1刻み）
+//maxTenths / ratioTenths ともに10倍の整数。軽ロリなら ratioTenths = 3（＝30%）
+//ちょうど境界に乗る場合は、軽い方に倒さず1段下げて安全側に寄せる
+//（境界ぴったりが軽ロリ側か中ロリ側かは資料によって記述が割れているため）
+function loadLimit(maxTenths, ratioTenths) {
+	var n = maxTenths * ratioTenths;
+	return n % 10 === 0 ? n / 10 - 1 : Math.floor(n / 10);
+}
+
 //耐性のレベル依存分（免疫・頑健・正気・抗死で共通）
 function resistByLevel(lvl) {
 	var n = lvl + 79;
@@ -183,7 +192,12 @@ function refresh(overrideKey, overrideVal) {
 	setText('hp', HP[cur.vit]);
 	setText('fp', FP[cur.mnd]);
 	setText('st', STAMINA[cur.edr]);
-	setText('cp', (EQUIP[cur.edr] / 10).toFixed(1));
+	var maxLoad = EQUIP[cur.edr];
+	setText('cp', (maxLoad / 10).toFixed(1));
+
+	//ローリング（軽ロリは最大重量の30%未満、中ロリは70%未満）
+	setText('rl1', (loadLimit(maxLoad, 3) / 10).toFixed(1));
+	setText('rl2', (loadLimit(maxLoad, 7) / 10).toFixed(1));
 
 	//耐性（防具なしの素の値）
 	var lvPart = resistByLevel(level);

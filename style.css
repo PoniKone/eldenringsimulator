@@ -126,10 +126,17 @@ main {
 	table-layout: fixed;
 	margin: 0 0 0px 0;
 }
+/* 「スタミナ:」が折り返さないよう、ラベル列を値列より広く取る */
 #skill td {
-	width: 25%;
 	text-align: right;
 	padding: 0 6px 0 0;
+	white-space: nowrap;
+}
+#skill td:nth-child(odd) {
+	width: 30%;
+}
+#skill td:nth-child(even) {
+	width: 20%;
 }
 #hp {
 	color: #ff6d00;
@@ -178,6 +185,30 @@ main {
 	margin: 0 0 0 5px;
 	text-align: center;
 	font-size: 12px;
+}
+
+/* ローリングの種類が変わる装備重量 */
+#roll {
+	display: table;
+	width: 100%;
+	table-layout: fixed;
+	margin: 4px 0 0 0;
+}
+#roll td {
+	text-align: right;
+	padding: 0 6px 0 0;
+	font-size: 14px;
+	white-space: nowrap;
+}
+#roll td:nth-child(odd) {
+	width: 30%;
+}
+#roll td:nth-child(even) {
+	width: 20%;
+}
+#rl1,#rl2 {
+	color: #ff006d;
+	font-size: 16px;
 }
 
 /* 状態異常耐性・必要ルーン */
