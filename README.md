@@ -35,6 +35,11 @@ URL:https://ponikone.github.io/eldenringsimulator/<br>
 2022/03/08<br>
 ・HP、FP、スタミナ、装備重量を実装
 
+# 更新するときの注意
+`style.css` か `main.js` を変更したら、`index.html` の `?v=YYYYMMDD` を必ず新しい日付に上げること。<br>
+GitHub Pages は `Cache-Control: max-age=600` で配信するため、これを忘れると
+新しい `index.html` と古い `style.css` / `main.js` が混ざって表示が崩れる。
+
 # 素性データ
 | 素性 | Lv | 生命 | 精神 | 持久 | 筋力 | 技量 | 知力 | 信仰 | 神秘 |
 |---|---|---|---|---|---|---|---|---|---|
