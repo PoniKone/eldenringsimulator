@@ -29,7 +29,7 @@
 		<meta name="description" content="ELDENRING(エルデンリング)パラメータシミュレータ。全12素性の初期ステータスからレベル・HP・FP・スタミナ・装備重量・状態異常耐性・必要ルーンを計算し、ビルドをURLで共有できます。個人制作の非公式ファンツールです。">
 		<title>ELDENRINGパラメータシミュレータ</title>
 		<!-- ?v= はキャッシュ対策。style.css と main.js を更新したら必ず日付を上げること -->
-		<link rel="stylesheet" href="style.css?v=20260830">
+		<link rel="stylesheet" href="style.css?v=20260830b">
 		<link href="jquery-ui-1.14.2/jquery-ui.css" rel="stylesheet">
 		<script src="jquery-ui-1.14.2/external/jquery/jquery.js"></script>
 		<script src="jquery-ui-1.14.2/jquery-ui.js"></script>
@@ -44,6 +44,7 @@
 			素性選択後、各能力値を変更してください。数値は直接入力もできます。<br>
 			レベル・HP・FP・スタミナ・装備重量・状態異常耐性・必要ルーンが表示されます。<br>
 			「軽ロリ」「中ロリ」は、その転がり方を維持できる装備重量の上限です。<br>
+			「詳細設定」でタリスマンを選ぶと、その補正込みの値になります。<br>
 			内容は自動で保存され、URLをコピーすればそのまま共有できます。<br>
 			キャラクターの育成プラン作成にお使いください。
 		</p>
@@ -187,6 +188,15 @@
 						</button>
 					</li>
 				</ul>
+				<details id="advanced">
+					<summary>詳細設定：タリスマン（<span id="talcount">0 / 4</span>）</summary>
+					<!-- 選択肢は main.js の TALISMANS から生成 -->
+					<ul id="talismans"></ul>
+					<p id="talnote">
+						HP・FP・スタミナ・装備重量を上げるものだけを扱います。<br>
+						能力値そのものを上げるタリスマン（ラダゴンの爛れ刻印など）は含みません。
+					</p>
+				</details>
 				<div id="controls">
 					<button id="share" role="button">
 						<span class="ui-button-text">URLをコピー</span>
@@ -211,6 +221,6 @@
 				「ELDEN RING」「エルデンリング」は上記各社の著作物・商標です。
 			</p>
 		</footer>
-		<script type="text/javascript" src="main.js?v=20260830"></script>
+		<script type="text/javascript" src="main.js?v=20260830b"></script>
 	</body>
 </html>

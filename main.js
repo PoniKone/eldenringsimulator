@@ -34,7 +34,69 @@ const STATS = [
 
 const MAX_STAT = 99;
 const MAX_LEVEL = 713;
+const TALISMAN_SLOTS = 4;
 const STORAGE_KEY = 'eldenring-simulator-state';
+
+//------------------------------------------------------------
+// タリスマン（HP・FP・スタミナ・装備重量を上げるものだけ）
+// 同じ系統の強化違いは同時装備できないので、系統ごとに1つ選ぶ形にする
+// ラダゴンの爛れ刻印など、能力値そのものを上げるものは対象外
+//------------------------------------------------------------
+const TALISMANS = [
+	{
+		id: 'talhp',
+		label: '緋琥珀のメダリオン',
+		options: [
+			{ name: 'なし',      hp: 0 },
+			{ name: '+0',        hp: 6 },
+			{ name: '+1',        hp: 7 },
+			{ name: '+2',        hp: 8 },
+			{ name: '+3 (DLC)',  hp: 10 }
+		]
+	},
+	{
+		id: 'talfp',
+		label: '青琥珀のメダリオン',
+		options: [
+			{ name: 'なし',      fp: 0 },
+			{ name: '+0',        fp: 7 },
+			{ name: '+1',        fp: 9 },
+			{ name: '+2',        fp: 11 },
+			{ name: '+3 (DLC)',  fp: 12.5 }
+		]
+	},
+	{
+		id: 'talst',
+		label: '緑琥珀のメダリオン',
+		options: [
+			{ name: 'なし',      st: 0 },
+			{ name: '+0',        st: 11 },
+			{ name: '+1',        st: 13 },
+			{ name: '+2',        st: 15 },
+			{ name: '+3 (DLC)',  st: 17 }
+		]
+	},
+	{
+		id: 'talet',
+		label: '黄金樹の恩寵',
+		options: [
+			{ name: 'なし', hp: 0,   st: 0,    eq: 0 },
+			{ name: '+0',   hp: 3,   st: 7,    eq: 5 },
+			{ name: '+1',   hp: 3.5, st: 8.5,  eq: 6.5 },
+			{ name: '+2',   hp: 4,   st: 10,   eq: 8 }
+		]
+	},
+	{
+		id: 'taleq',
+		label: '武具塊',
+		options: [
+			{ name: 'なし',          eq: 0 },
+			{ name: 'お守り',        eq: 15 },
+			{ name: 'お守り+1',      eq: 17 },
+			{ name: '大壺の武具塊',  eq: 19 }
+		]
+	}
+];
 
 //------------------------------------------------------------
 // 派生ステータス表（添字＝能力値 1〜99。0番は未使用）
@@ -108,6 +170,23 @@ function runeTotal(fromLv, toLv) {
 	var sum = 0;
 	for (var i = fromLv; i < toLv; i++) sum += runeCost(i);
 	return sum;
+}
+
+//選択中の強化段階（options の添字）
+function talismanIndex(t) {
+	var v = parseInt($('#' + t.id).val(), 10);
+	return isNaN(v) || !t.options[v] ? 0 : v;
+}
+
+//指定ステータスへのタリスマン補正の倍率
+//同じステータスへの複数のタリスマンは加算ではなく乗算で重なる
+function talismanMult(stat) {
+	var m = 1;
+	TALISMANS.forEach(function(t) {
+		var pct = t.options[talismanIndex(t)][stat];
+		if (pct) m *= 1 + pct / 100;
+	});
+	return m;
 }
 
 //ローリングの種類が変わる装備重量の上限（0.1刻み）
@@ -189,10 +268,10 @@ function refresh(overrideKey, overrideVal) {
 	});
 
 	setText('lv', level);
-	setText('hp', HP[cur.vit]);
-	setText('fp', FP[cur.mnd]);
-	setText('st', STAMINA[cur.edr]);
-	var maxLoad = EQUIP[cur.edr];
+	setText('hp', Math.floor(HP[cur.vit] * talismanMult('hp')));
+	setText('fp', Math.floor(FP[cur.mnd] * talismanMult('fp')));
+	setText('st', Math.floor(STAMINA[cur.edr] * talismanMult('st')));
+	var maxLoad = Math.floor(EQUIP[cur.edr] * talismanMult('eq'));
 	setText('cp', (maxLoad / 10).toFixed(1));
 
 	//ローリング（軽ロリは最大重量の30%未満、中ロリは70%未満）
@@ -240,8 +319,9 @@ function step(key, delta) {
 //------------------------------------------------------------
 //現在の状態を URL のハッシュと localStorage に書き出す
 function saveState(cur) {
-	var hash = '#c=' + classIndex + '&s=' +
-		STATS.map(function(s){ return cur[s.key]; }).join('.');
+	var hash = '#c=' + classIndex +
+		'&s=' + STATS.map(function(s){ return cur[s.key]; }).join('.') +
+		'&t=' + TALISMANS.map(talismanIndex).join('.');
 	if (location.hash !== hash) {
 		try {
 			history.replaceState(null, '', location.pathname + location.search + hash);
@@ -256,9 +336,10 @@ function saveState(cur) {
 	}
 }
 
-//"#c=0&s=15.10.11.14.13.9.9.7" を解釈する。壊れていれば null
+//"#c=0&s=15.10.11.14.13.9.9.7&t=0.0.0.0.0" を解釈する。壊れていれば null
+//&t= はタリスマン追加前のURLには無いので、無ければ全て「なし」とみなす
 function parseState(hash) {
-	var m = /^#c=(\d+)&s=([\d.]+)$/.exec(hash || '');
+	var m = /^#c=(\d+)&s=([\d.]+)(?:&t=([\d.]+))?$/.exec(hash || '');
 	if (!m) return null;
 	var ci = parseInt(m[1], 10);
 	if (!CLASSES[ci]) return null;
@@ -268,7 +349,19 @@ function parseState(hash) {
 	for (var i = 0; i < vals.length; i++) {
 		if (isNaN(vals[i]) || vals[i] < base[i + 1] || vals[i] > MAX_STAT) return null;
 	}
-	return { classIndex: ci, values: vals };
+
+	var tals = TALISMANS.map(function(){ return 0; });
+	if (m[3]) {
+		var raw = m[3].split('.').map(function(v){ return parseInt(v, 10); });
+		if (raw.length !== TALISMANS.length) return null;
+		for (var j = 0; j < raw.length; j++) {
+			if (isNaN(raw[j]) || !TALISMANS[j].options[raw[j]]) return null;
+		}
+		//枠数を超えたURLは壊れているとみなす
+		if (raw.filter(function(v){ return v > 0; }).length > TALISMAN_SLOTS) return null;
+		tals = raw;
+	}
+	return { classIndex: ci, values: vals, talismans: tals };
 }
 
 //URL → localStorage → 素性の初期値、の優先順で復元
@@ -291,6 +384,36 @@ function restoreState() {
 			.spinner('option', 'min', baseStats[i + 1])
 			.spinner('value', state.values[i]);
 	});
+	TALISMANS.forEach(function(t, i) {
+		$('#' + t.id).val(state.talismans[i]);
+	});
+}
+
+//タリスマンのプルダウンを TALISMANS から生成
+function buildTalismans() {
+	var $list = $('#talismans');
+	TALISMANS.forEach(function(t) {
+		var $sel = $('<select>').attr('id', t.id);
+		t.options.forEach(function(o, i) {
+			$sel.append($('<option>').val(i).text(o.name));
+		});
+		$sel.on('change', function() {
+			updateSlots();
+			refresh();
+		});
+		$list.append($('<li>')
+			.append($('<label>').attr('for', t.id).text(t.label + ':'))
+			.append($sel));
+	});
+}
+
+//タリスマン枠は4つまで。埋まったら「なし」のプルダウンを選べなくする
+function updateSlots() {
+	var used = TALISMANS.filter(function(t){ return talismanIndex(t) > 0; }).length;
+	TALISMANS.forEach(function(t) {
+		$('#' + t.id).prop('disabled', used >= TALISMAN_SLOTS && talismanIndex(t) === 0);
+	});
+	setText('talcount', used + ' / ' + TALISMAN_SLOTS);
 }
 
 //クリップボードAPIが使えない・拒否された場合のフォールバック
@@ -372,8 +495,12 @@ $(function() {
 		$('#tendown' + (i + 1)).button().on('click', function() { step(s.key, -10); });
 	});
 
+	//タリスマン（復元より先に作っておく）
+	buildTalismans();
+
 	//URL・localStorage から復元
 	restoreState();
+	updateSlots();
 
 	//素性選択
 	//jQuery UI の selectmenu はタッチで開かないため、ネイティブの select をそのまま使う
@@ -383,7 +510,11 @@ $(function() {
 
 	//共有・リセット
 	$('#share').button().on('click', copyUrl);
-	$('#reset').button().on('click', function() { applyClass(classIndex); });
+	$('#reset').button().on('click', function() {
+		TALISMANS.forEach(function(t){ $('#' + t.id).val(0); });
+		updateSlots();
+		applyClass(classIndex);
+	});
 
 	ready = true;
 	refresh();

@@ -240,6 +240,60 @@ main {
 	font-size: 16px;
 }
 
+/* 詳細設定（タリスマン） */
+#advanced {
+	margin: 20px 0 0 0;
+	padding: 10px 0 0 0;
+	border-top: solid 1px #616161;
+	font-size: 14px;
+}
+#advanced summary {
+	cursor: pointer;
+	padding: 4px 0;
+}
+#cnt2 #talismans {
+	margin: 8px 0 0 0;
+}
+#cnt2 #talismans li {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin: 0 0 6px 0;
+	font-size: 13px;
+}
+#talismans label {
+	padding: 0 6px 0 0;
+}
+#talismans select {
+	width: 130px;
+	height: 30px;
+	padding: 2px 4px;
+	/* iOSでフォーカス時に拡大されないように16px以上にする */
+	font-size: 16px;
+	font-family: 'NotoSans',sans-serif;
+	color: #fff;
+	background-color: #333;
+	border: solid 1px #bdbdbd;
+	border-radius: 3px;
+}
+#talismans select:disabled {
+	color: #757575;
+	border-color: #616161;
+}
+#talismans option {
+	color: #fff;
+	background-color: #333;
+}
+#cnt2 #talnote {
+	margin: 10px 0 0 0;
+	font-size: 11px;
+	line-height: 1.6em;
+	color: #9e9e9e;
+}
+#talcount {
+	color: #ff6d00;
+}
+
 /* 共有・リセット */
 #controls {
 	margin: 20px 0 0 0;
